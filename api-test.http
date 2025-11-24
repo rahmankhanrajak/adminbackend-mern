@@ -1,0 +1,232 @@
+# ### Test hello with name
+# GET http://localhost:8000/notes
+
+# ### Test with POST (we'll add this endpoint later)
+
+# ### Test with POST (we'll add this endpoint later)
+# POST http://localhost:8000/notes
+# Content-Type: application/json
+
+# {
+#   "title": "My second Note",
+#   "contents": "This is a test note!"
+# }
+
+# ### Test PUT with partial update (if you implement it)
+# PUT http://localhost:8000/notes/68cfaf7208362b1d55d32ded
+# Content-Type: application/json
+
+# {
+#   "title": "Only Title Updated",
+#   "contents": "Only Title Updated"
+# }
+
+
+# ### DELETE a note (replace ACTUAL_ID with real ID)
+# DELETE http://localhost:8000/notes/68cfaffb08362b1d55d32def
+
+
+# WaterCane API Testing
+# Start server: node app.js
+# Server should run on http://localhost:8000
+
+### ============== VENDOR TESTS ==============
+
+### 1. Get all vendors (initially empty)
+GET http://localhost:8000/vendors
+
+### 2. Create first vendor - Raj
+POST http://localhost:8000/vendors
+Content-Type: application/json
+
+{
+  "vendorName": "Raj",
+  "Area": "Chennai",
+  "Address": "Padi"
+}
+
+### 3. Create second vendor - Rahul
+POST http://localhost:8000/vendors
+Content-Type: application/json
+
+{
+  "vendorName": "Rahul",
+  "Area": "Chennai",
+  "Address": "Velachery"
+}
+
+### 4. Get all vendors again (should show 2)
+GET http://localhost:8000/vendors
+
+### 5. Get single vendor by ID (replace with actual _id from create response)
+GET http://localhost:8000/vendors/REPLACE_WITH_VENDOR_ID
+
+### 6. Update vendor (replace with actual _id)
+PUT http://localhost:8000/vendors/REPLACE_WITH_VENDOR_ID
+Content-Type: application/json
+
+{
+  "vendorName": "Raj",
+  "Area": "Chennai",
+  "Address": "Padi - Updated Address"
+}
+
+### 7. Delete vendor (replace with actual _id - WARNING: cascades to brands & products)
+DELETE http://localhost:8000/vendors/REPLACE_WITH_VENDOR_ID
+
+### ============== BRAND TESTS ==============
+
+### 8. Get all brands (initially empty)
+GET http://localhost:8000/brands
+
+### 9. Create brand for Raj - Bisleri
+POST http://localhost:8000/brands
+Content-Type: application/json
+
+{
+  "vendor": "Raj",
+  "newTask": "Bisleri"
+}
+
+### 10. Create another brand for Raj - Aqua
+POST http://localhost:8000/brands
+Content-Type: application/json
+
+{
+  "vendor": "Raj",
+  "newTask": "Aqua"
+}
+
+### 11. Create brand for Rahul
+POST http://localhost:8000/brands
+Content-Type: application/json
+
+{
+  "vendor": "Rahul",
+  "newTask": "Kinley"
+}
+
+### 12. Get all brands
+GET http://localhost:8000/brands
+
+### 13. Get brands by vendor name
+GET http://localhost:8000/brands/vendor/Raj
+
+### 14. Update brand (replace with actual _id)
+PUT http://localhost:8000/brands/REPLACE_WITH_BRAND_ID
+Content-Type: application/json
+
+{
+  "vendor": "Raj",
+  "newTask": "Bisleri Premium"
+}
+
+### 15. Delete brand (replace with actual _id - WARNING: cascades to products)
+DELETE http://localhost:8000/brands/REPLACE_WITH_BRAND_ID
+
+### ============== PRODUCT TESTS ==============
+
+### 16. Get all products (initially empty)
+GET http://localhost:8000/products
+
+### 17. Create product - Bisleri 10L for Raj
+POST http://localhost:8000/products
+Content-Type: application/json
+
+{
+  "vendor": "Raj",
+  "selectBrand": "Bisleri",
+  "selectqty": "10L"
+}
+
+### 18. Create product - Aqua 20L for Raj
+POST http://localhost:8000/products
+Content-Type: application/json
+
+{
+  "vendor": "Raj",
+  "selectBrand": "Aqua",
+  "selectqty": "20L"
+}
+
+### 19. Create product - Kinley 30L for Rahul
+POST http://localhost:8000/products
+Content-Type: application/json
+
+{
+  "vendor": "Rahul",
+  "selectBrand": "Kinley",
+  "selectqty": "30L"
+}
+
+### 20. Get all products
+GET http://localhost:8000/products
+
+### 21. Get products by vendor
+GET http://localhost:8000/products/vendor/Raj
+
+### 22. Update product (replace with actual _id)
+PUT http://localhost:8000/products/REPLACE_WITH_PRODUCT_ID
+Content-Type: application/json
+
+{
+  "vendor": "Raj",
+  "selectBrand": "Bisleri",
+  "selectqty": "20L"
+}
+
+### 23. Delete product (replace with actual _id)
+DELETE http://localhost:8000/products/REPLACE_WITH_PRODUCT_ID
+
+### ============== ERROR HANDLING TESTS ==============
+
+### 24. Test missing vendorName
+POST http://localhost:8000/vendors
+Content-Type: application/json
+
+{
+  "Area": "Chennai",
+  "Address": "Test"
+}
+
+### 25. Test missing Area
+POST http://localhost:8000/vendors
+Content-Type: application/json
+
+{
+  "vendorName": "TestVendor",
+  "Address": "Test"
+}
+
+### 26. Test duplicate vendor name
+POST http://localhost:8000/vendors
+Content-Type: application/json
+
+{
+  "vendorName": "Raj",
+  "Area": "Mumbai",
+  "Address": "Test"
+}
+
+### 27. Test missing brand name
+POST http://localhost:8000/brands
+Content-Type: application/json
+
+{
+  "vendor": "Raj"
+}
+
+### 28. Test missing product quantity
+POST http://localhost:8000/products
+Content-Type: application/json
+
+{
+  "vendor": "Raj",
+  "selectBrand": "Bisleri"
+}
+
+### 29. Test invalid MongoDB ID format
+GET http://localhost:8000/vendors/invalid-id-12345
+
+### 30. Test non-existent vendor ID (valid format but doesn't exist)
+GET http://localhost:8000/vendors/507f1f77bcf86cd799439011
