@@ -1,82 +1,67 @@
 ### 1. Get all vendors
 GET http://localhost:8000/vendors
 
-
-### 2. Create Vendor - Raj Enterprises
+### 2. Create first vendor 
 POST http://localhost:8000/vendors
 Content-Type: application/json
 
 {
-  "vendorName": "Rahman",
-  "Area": "Anna Nagar",
-  "Address": "123 Street, Anna Nagar, Chennai"
+  "vendorName": "Rahmankhan",
+  "Area": "Chennai",
+  "Address": "Chennai,Tamilnadu"
 }
 
-
-### 3. Create Vendor - Kumar Trading Co
+### 3. Create second vendor - Kumar
 POST http://localhost:8000/vendors
 Content-Type: application/json
 
 {
   "vendorName": "Kumar Trading Co",
   "Area": "T Nagar",
-  "Address": "456 Market Road, Chennai"
+  "Address": "456 Market Road, T Nagar, Chennai"
 }
 
-
-### 4. Create Vendor - Priya Distributors
+### 4. Create third vendor - Priya
 POST http://localhost:8000/vendors
 Content-Type: application/json
 
 {
   "vendorName": "Priya Distributors",
   "Area": "Velachery",
-  "Address": "789 Park Avenue, Chennai"
+  "Address": "789 Park Avenue, Velachery, Chennai"
 }
 
+### 5. Get specific vendor by ID
+GET http://localhost:8000/vendors/VENDOR_ID_HERE
 
-### 5. Get Vendor by ID
-GET http://localhost:8000/vendors/6925c8c66580bd0d1ca1fc33
-# GET http://localhost:8000/vendors/VENDOR_ID_HERE
-
-
-### 6. Update vendor by ID
-PUT http://localhost:8000/vendors/6925c8c66580bd0d1ca1fc33
-# PUT http://localhost:8000/vendors/VENDOR_ID_HERE
+### 6. Update vendor (Replace with actual ID)
+PUT http://localhost:8000/vendors/VENDOR_ID_HERE
 Content-Type: application/json
 
 {
-  "vendorName": "Rahmankhan",
+  "vendorName": "Raj Enterprises Updated",
   "Area": "Anna Nagar West",
-  "Address": "Updated Address, Chennai"
+  "Address": "123 Main Street, Anna Nagar West, Chennai"
 }
 
-
-### 7. Delete vendor by ID
-DELETE http://localhost:8000/vendors/6925beb46580bd0d1ca1fc15
-# DELETE http://localhost:8000/vendors/VENDOR_ID_HERE
+### 7. Delete vendor (Replace with actual ID)
+DELETE http://localhost:8000/vendors/6925c8c66580bd0d1ca1fc33
 
 
-
-###############################################################
-#                        BRAND TESTS                          #
-###############################################################
 
 ### 8. Get all brands
 GET http://localhost:8000/brands
 
-
-### 9. Create Brand - Aquafina
+### 9. Create brand for vendor (Replace VENDOR_ID_HERE with actual vendor ID)
 POST http://localhost:8000/brands
 Content-Type: application/json
 
 {
   "vendorId": "6925c8c66580bd0d1ca1fc33",
-  "newTask": "Aquafina"
+  "newTask": "Aquafina premium"
 }
 
-
-### 10. Create Brand - Bisleri
+### 10. Create another brand
 POST http://localhost:8000/brands
 Content-Type: application/json
 
@@ -85,8 +70,7 @@ Content-Type: application/json
   "newTask": "Bisleri"
 }
 
-
-### 11. Create Brand - Kinley
+### 11. Create third brand
 POST http://localhost:8000/brands
 Content-Type: application/json
 
@@ -95,165 +79,151 @@ Content-Type: application/json
   "newTask": "Kinley"
 }
 
+### 12. Get brands by vendor ID (Replace with actual vendor ID)
+GET http://localhost:8000/brands/vendor/VENDOR_ID_HERE
 
-### 12. Get brands by vendor
-GET http://localhost:8000/brands/vendor/6925c8c66580bd0d1ca1fc33
-# GET http://localhost:8000/brands/vendor/VENDOR_ID_HERE
-
-
-### 13. Update brand
-PUT http://localhost:8000/brands/6925c90e6580bd0d1ca1fc38
-# PUT http://localhost:8000/brands/BRAND_ID_HERE
+### 13. Update brand (Replace BRAND_ID_HERE with actual brand ID)
+PUT http://localhost:8000/brands/BRAND_ID_HERE
 Content-Type: application/json
 
 {
-  "vendorId": "6925c8c66580bd0d1ca1fc33",
+  "vendorId": "VENDOR_ID_HERE",
   "newTask": "Aquafina Premium"
 }
 
-
-### 14. Delete brand
+### 14. Delete brand (Replace with actual ID)
 DELETE http://localhost:8000/brands/BRAND_ID_HERE
 
+
+#################### PRODUCT TESTS ####################
 
 ### 15. Get all products
 GET http://localhost:8000/products
 
+### 16. Create product (Replace VENDOR_ID_HERE and BRAND_ID_HERE with actual IDs)
+POST http://localhost:8000/products
+Content-Type: application/json
 
-### 16. Create product (100 qty)
+{
+  "vendorId": "VENDOR_ID_HERE",
+  "brandId": "BRAND_ID_HERE",
+  "selectqty": "100"
+}
+
+### 17. Create another product
 POST http://localhost:8000/products
 Content-Type: application/json
 
 {
   "vendorId": "6925c8c66580bd0d1ca1fc33",
-  "brandId": "6925c90e6580bd0d1ca1fc38",
-  "selectqty": 100
+  "brandId": "6926a8711e67f080743580f5",
+  "selectqty": "20"
 }
 
-
-### 17. Create product (200 qty)
+### 18. Create third product
 POST http://localhost:8000/products
 Content-Type: application/json
 
 {
   "vendorId": "VENDOR_ID_HERE",
   "brandId": "BRAND_ID_HERE",
-  "selectqty": 200
+  "selectqty": "150"
 }
 
-
-### 18. Create product (150 qty)
-POST http://localhost:8000/products
-Content-Type: application/json
-
-{
-  "vendorId": "VENDOR_ID_HERE",
-  "brandId": "BRAND_ID_HERE",
-  "selectqty": 150
-}
-
-
-### 19. Get products by vendor
+### 19. Get products by vendor ID (Replace with actual vendor ID)
 GET http://localhost:8000/products/vendor/VENDOR_ID_HERE
 
-
-### 20. Update product
+### 20. Update product (Replace PRODUCT_ID_HERE, VENDOR_ID_HERE, and BRAND_ID_HERE with actual IDs)
 PUT http://localhost:8000/products/PRODUCT_ID_HERE
 Content-Type: application/json
 
 {
   "vendorId": "VENDOR_ID_HERE",
   "brandId": "BRAND_ID_HERE",
-  "selectqty": 250
+  "selectqty": "250"
 }
 
-
-### 21. Delete product
+### 21. Delete product (Replace with actual ID)
 DELETE http://localhost:8000/products/PRODUCT_ID_HERE
 
 
-### 22. Create vendor with missing fields — should fail
+#################### ERROR TESTS ####################
+
+### 22. Test - Create vendor with missing fields (should fail)
 POST http://localhost:8000/vendors
 Content-Type: application/json
 
 {
-  "vendorName": "Incomplete Vendor"
+  "vendorName": "Test Vendor"
 }
 
-
-### 23. Create brand with invalid vendor ID — should fail
+### 23. Test - Create brand with invalid vendor ID (should fail)
 POST http://localhost:8000/brands
 Content-Type: application/json
 
 {
   "vendorId": "000000000000000000000000",
-  "newTask": "Invalid Brand"
+  "newTask": "Test Brand"
 }
 
-
-### 24. Get non-existent vendor — should 404
+### 24. Test - Get non-existent vendor (should return 404)
 GET http://localhost:8000/vendors/000000000000000000000000
 
-
-### 25. Create duplicate vendor — should fail
+### 25. Test - Create duplicate vendor name (should fail)
 POST http://localhost:8000/vendors
 Content-Type: application/json
 
 {
   "vendorName": "Raj Enterprises",
-  "Area": "Duplicate",
-  "Address": "Duplicate"
+  "Area": "Duplicate Test",
+  "Address": "Duplicate Address"
 }
 
-
-### 26. Create product with mismatched brand/vendor — should fail
+### 26. Test - Create product with brand that doesn't belong to vendor (should fail)
 POST http://localhost:8000/products
 Content-Type: application/json
 
 {
   "vendorId": "VENDOR_ID_1",
-  "brandId": "BRAND_ID_FROM_ANOTHER_VENDOR",
-  "selectqty": 100
+  "brandId": "BRAND_ID_FROM_DIFFERENT_VENDOR",
+  "selectqty": "100"
 }
 
 
+#################### WORKFLOW TEST ####################
+### Complete workflow: Create vendor → Create brand → Create product
 
-### 27. Create workflow vendor
+### 27. Step 1: Create vendor
 POST http://localhost:8000/vendors
 Content-Type: application/json
 
 {
-  "vendorName": "Workflow Vendor",
-  "Area": "Area Test",
-  "Address": "Address Test"
+  "vendorName": "Workflow Test Vendor",
+  "Area": "Test Area",
+  "Address": "Test Address"
 }
 
-
-### 28. Create workflow brand
+### 28. Step 2: Create brand (use vendor ID from step 1)
 POST http://localhost:8000/brands
 Content-Type: application/json
 
 {
-  "vendorId": "WORKFLOW_VENDOR_ID",
-  "newTask": "Workflow Brand"
+  "vendorId": "VENDOR_ID_FROM_STEP_1",
+  "newTask": "Test Brand"
 }
 
-
-### 29. Create workflow product
+### 29. Step 3: Create product (use vendor ID and brand ID from steps 1 & 2)
 POST http://localhost:8000/products
 Content-Type: application/json
 
 {
-  "vendorId": "WORKFLOW_VENDOR_ID",
-  "brandId": "WORKFLOW_BRAND_ID",
-  "selectqty": 500
+  "vendorId": "VENDOR_ID_FROM_STEP_1",
+  "brandId": "BRAND_ID_FROM_STEP_2",
+  "selectqty": "500"
 }
 
+### 30. Step 4: Verify - Get all brands for this vendor
+GET http://localhost:8000/brands/vendor/VENDOR_ID_FROM_STEP_1
 
-### 30. Verify brands for workflow vendor
-GET http://localhost:8000/brands/vendor/WORKFLOW_VENDOR_ID
-
-
-### 31. Verify products for workflow vendor
-GET http://localhost:8000/products/vendor/WORKFLOW_VENDOR_ID
-
+### 31. Step 5: Verify - Get all products for this vendor
+GET http://localhost:8000/products/vendor/VENDOR_ID_FROM_STEP_1

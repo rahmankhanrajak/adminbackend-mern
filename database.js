@@ -22,6 +22,7 @@ async function connectDB() {
 
 await connectDB();
 
+
 const vendorSchema = new mongoose.Schema(
   {
     vendorName: {
@@ -44,8 +45,6 @@ const vendorSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Vendor = mongoose.model("Vendor", vendorSchema);
-
 const brandSchema = new mongoose.Schema(
   {
     vendorId: {
@@ -61,8 +60,6 @@ const brandSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
-const Brand = mongoose.model("Brand", brandSchema);
 
 const productSchema = new mongoose.Schema(
   {
@@ -85,7 +82,13 @@ const productSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// ==================== MODELS ====================
+
+const Vendor = mongoose.model("Vendor", vendorSchema);
+const Brand = mongoose.model("Brand", brandSchema);
 const Product = mongoose.model("Product", productSchema);
+
+// ==================== VENDOR FUNCTIONS ====================
 
 export const getVendors = async () => {
   try {
@@ -187,7 +190,6 @@ export const getBrandsByVendorId = async (vendorId) => {
 
 export const createBrand = async (vendorId, newTask) => {
   try {
-    // Verify vendor exists
     const vendor = await Vendor.findById(vendorId);
     if (!vendor) {
       throw new Error("Vendor not found");
@@ -196,7 +198,6 @@ export const createBrand = async (vendorId, newTask) => {
     const brand = new Brand({ vendorId, newTask });
     const savedBrand = await brand.save();
 
-    // Populate vendor info for response
     await savedBrand.populate("vendorId", "vendorName");
 
     console.log("Brand created:", savedBrand.newTask, "for vendor:", vendor.vendorName);
@@ -209,7 +210,6 @@ export const createBrand = async (vendorId, newTask) => {
 
 export const updateBrand = async (id, vendorId, newTask) => {
   try {
-    // Verify vendor exists
     const vendor = await Vendor.findById(vendorId);
     if (!vendor) {
       throw new Error("Vendor not found");
@@ -248,6 +248,7 @@ export const deleteBrand = async (id) => {
     throw error;
   }
 };
+
 
 export const getProducts = async () => {
   try {
@@ -296,6 +297,7 @@ export const createProduct = async (vendorId, brandId, selectqty) => {
     const product = new Product({ vendorId, brandId, selectqty });
     const savedProduct = await product.save();
 
+    // Populate vendor and brand info for response
     await savedProduct.populate("vendorId", "vendorName");
     await savedProduct.populate("brandId", "newTask");
 
@@ -355,4 +357,3 @@ export const deleteProduct = async (id) => {
     throw error;
   }
 };
-
