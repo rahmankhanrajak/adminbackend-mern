@@ -2,9 +2,17 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 dotenv.config();
 
+const MONGO_URI = process.env.MONGODB_URI || process.env.MONGO_URI;
+if (!MONGO_URI) {
+  console.error("Missing MongoDB URI. Set MONGODB_URI (or MONGO_URI) in .env");
+  process.exit(1);
+}
+
+mongoose.set("strictQuery", false);
+
 async function connectDB() {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
+    await mongoose.connect(MONGO_URI);
     console.log("Connected to MongoDB - WaterCane Database");
   } catch (error) {
     console.error("MongoDB connection error:", error);
@@ -14,63 +22,68 @@ async function connectDB() {
 
 await connectDB();
 
-const vendorSchema = new mongoose.Schema({
-  vendorName: {
-    type: String,
-    required: true,
-    unique: true,
+const vendorSchema = new mongoose.Schema(
+  {
+    vendorName: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+    Area: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    Address: {
+      type: String,
+      required: true,
+      trim: true,
+    },
   },
-  Area: {
-    type: String,
-    required: true,
-  },
-  Address: {
-    type: String,
-    required: true,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  { timestamps: true }
+);
 
 const Vendor = mongoose.model("Vendor", vendorSchema);
 
-const brandSchema = new mongoose.Schema({
-  vendor: {
-    type: String,
-    required: true,
+const brandSchema = new mongoose.Schema(
+  {
+    vendorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Vendor",
+      required: true,
+    },
+    newTask: {
+      type: String,
+      required: true,
+      trim: true,
+    },
   },
-  newTask: {
-    type: String,
-    required: true,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  { timestamps: true }
+);
 
 const Brand = mongoose.model("Brand", brandSchema);
 
-const productSchema = new mongoose.Schema({
-  vendor: {
-    type: String,
-    required: true,
+const productSchema = new mongoose.Schema(
+  {
+    vendorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Vendor",
+      required: true,
+    },
+    brandId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Brand",
+      required: true,
+    },
+    selectqty: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
   },
-  selectBrand: {
-    type: String,
-    required: true,
-  },
-  selectqty: {
-    type: String,
-    required: true,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  { timestamps: true }
+);
 
 const Product = mongoose.model("Product", productSchema);
 
@@ -128,15 +141,14 @@ export const deleteVendor = async (id) => {
     const vendor = await Vendor.findById(id);
     if (!vendor) return false;
 
-    const vendorName = vendor.vendorName;
-    console.log("Deleting vendor:", vendorName);
+    console.log("Deleting vendor:", vendor.vendorName);
 
     await Vendor.findByIdAndDelete(id);
 
-    const deletedBrands = await Brand.deleteMany({ vendor: vendorName });
+    const deletedBrands = await Brand.deleteMany({ vendorId: id });
     console.log(`Deleted ${deletedBrands.deletedCount} brands`);
 
-    const deletedProducts = await Product.deleteMany({ vendor: vendorName });
+    const deletedProducts = await Product.deleteMany({ vendorId: id });
     console.log(`Deleted ${deletedProducts.deletedCount} products`);
 
     return true;
@@ -146,10 +158,13 @@ export const deleteVendor = async (id) => {
   }
 };
 
+
 export const getBrands = async () => {
   try {
     console.log("Fetching brands...");
-    const brands = await Brand.find({}).sort({ createdAt: -1 });
+    const brands = await Brand.find({})
+      .populate("vendorId", "vendorName")
+      .sort({ createdAt: -1 });
     console.log(`Found ${brands.length} brands`);
     return brands;
   } catch (error) {
@@ -158,9 +173,11 @@ export const getBrands = async () => {
   }
 };
 
-export const getBrandsByVendor = async (vendor) => {
+export const getBrandsByVendorId = async (vendorId) => {
   try {
-    const brands = await Brand.find({ vendor }).sort({ createdAt: -1 });
+    const brands = await Brand.find({ vendorId })
+      .populate("vendorId", "vendorName")
+      .sort({ createdAt: -1 });
     return brands;
   } catch (error) {
     console.error("Error getting brands by vendor:", error);
@@ -168,11 +185,21 @@ export const getBrandsByVendor = async (vendor) => {
   }
 };
 
-export const createBrand = async (vendor, newTask) => {
+export const createBrand = async (vendorId, newTask) => {
   try {
-    const brand = new Brand({ vendor, newTask });
+    // Verify vendor exists
+    const vendor = await Vendor.findById(vendorId);
+    if (!vendor) {
+      throw new Error("Vendor not found");
+    }
+
+    const brand = new Brand({ vendorId, newTask });
     const savedBrand = await brand.save();
-    console.log("Brand created:", savedBrand.newTask, "for vendor:", vendor);
+
+    // Populate vendor info for response
+    await savedBrand.populate("vendorId", "vendorName");
+
+    console.log("Brand created:", savedBrand.newTask, "for vendor:", vendor.vendorName);
     return savedBrand;
   } catch (error) {
     console.error("Error creating brand:", error);
@@ -180,13 +207,20 @@ export const createBrand = async (vendor, newTask) => {
   }
 };
 
-export const updateBrand = async (id, vendor, newTask) => {
+export const updateBrand = async (id, vendorId, newTask) => {
   try {
+    // Verify vendor exists
+    const vendor = await Vendor.findById(vendorId);
+    if (!vendor) {
+      throw new Error("Vendor not found");
+    }
+
     const updatedBrand = await Brand.findByIdAndUpdate(
       id,
-      { vendor, newTask },
+      { vendorId, newTask },
       { new: true }
-    );
+    ).populate("vendorId", "vendorName");
+
     console.log("Brand updated:", updatedBrand?.newTask);
     return updatedBrand;
   } catch (error) {
@@ -205,9 +239,7 @@ export const deleteBrand = async (id) => {
 
     await Brand.findByIdAndDelete(id);
 
-    const deletedProducts = await Product.deleteMany({
-      selectBrand: brandName,
-    });
+    const deletedProducts = await Product.deleteMany({ brandId: id });
     console.log(`Deleted ${deletedProducts.deletedCount} products`);
 
     return true;
@@ -220,7 +252,10 @@ export const deleteBrand = async (id) => {
 export const getProducts = async () => {
   try {
     console.log("Fetching products...");
-    const products = await Product.find({}).sort({ createdAt: -1 });
+    const products = await Product.find({})
+      .populate("vendorId", "vendorName")
+      .populate("brandId", "newTask")
+      .sort({ createdAt: -1 });
     console.log(`Found ${products.length} products`);
     return products;
   } catch (error) {
@@ -229,9 +264,12 @@ export const getProducts = async () => {
   }
 };
 
-export const getProductsByVendor = async (vendor) => {
+export const getProductsByVendorId = async (vendorId) => {
   try {
-    const products = await Product.find({ vendor }).sort({ createdAt: -1 });
+    const products = await Product.find({ vendorId })
+      .populate("vendorId", "vendorName")
+      .populate("brandId", "newTask")
+      .sort({ createdAt: -1 });
     return products;
   } catch (error) {
     console.error("Error getting products by vendor:", error);
@@ -239,16 +277,34 @@ export const getProductsByVendor = async (vendor) => {
   }
 };
 
-export const createProduct = async (vendor, selectBrand, selectqty) => {
+export const createProduct = async (vendorId, brandId, selectqty) => {
   try {
-    const product = new Product({ vendor, selectBrand, selectqty });
+    const vendor = await Vendor.findById(vendorId);
+    if (!vendor) {
+      throw new Error("Vendor not found");
+    }
+
+    const brand = await Brand.findById(brandId);
+    if (!brand) {
+      throw new Error("Brand not found");
+    }
+
+    if (brand.vendorId.toString() !== vendorId) {
+      throw new Error("Brand does not belong to the selected vendor");
+    }
+
+    const product = new Product({ vendorId, brandId, selectqty });
     const savedProduct = await product.save();
+
+    await savedProduct.populate("vendorId", "vendorName");
+    await savedProduct.populate("brandId", "newTask");
+
     console.log(
       "Product created:",
-      selectBrand,
+      brand.newTask,
       selectqty,
       "for vendor:",
-      vendor
+      vendor.vendorName
     );
     return savedProduct;
   } catch (error) {
@@ -257,14 +313,31 @@ export const createProduct = async (vendor, selectBrand, selectqty) => {
   }
 };
 
-export const updateProduct = async (id, vendor, selectBrand, selectqty) => {
+export const updateProduct = async (id, vendorId, brandId, selectqty) => {
   try {
+    const vendor = await Vendor.findById(vendorId);
+    if (!vendor) {
+      throw new Error("Vendor not found");
+    }
+
+    const brand = await Brand.findById(brandId);
+    if (!brand) {
+      throw new Error("Brand not found");
+    }
+
+    if (brand.vendorId.toString() !== vendorId) {
+      throw new Error("Brand does not belong to the selected vendor");
+    }
+
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
-      { vendor, selectBrand, selectqty },
+      { vendorId, brandId, selectqty },
       { new: true }
-    );
-    console.log("Product updated:", updatedProduct?.selectBrand);
+    )
+      .populate("vendorId", "vendorName")
+      .populate("brandId", "newTask");
+
+    console.log("Product updated:", updatedProduct?.brandId?.newTask);
     return updatedProduct;
   } catch (error) {
     console.error("Error updating product:", error);
@@ -282,3 +355,4 @@ export const deleteProduct = async (id) => {
     throw error;
   }
 };
+
